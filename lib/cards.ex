@@ -13,13 +13,9 @@ defmodule Cards do
   Note that the original diagram states that create_deck will "Create an array of playing cards"
   Using an array wouldn't make sense to me. For now, I'm using a list instead.
   (I assume that Stephen will do the same, but we'll see.)
+  Note that a hand is effectively just a deck.
   """
   @type deck :: list(card)
-
-  @typedoc """
-  A hand of cards
-  """
-  @type hand :: list(card)
 
   @doc """
   I'll pass in ranks and suits
@@ -28,19 +24,70 @@ defmodule Cards do
   """
   @spec create_deck(list(String.t()), list(String.t())) :: deck
   def create_deck(
-        ranks \\ ["ace", "deuce", "trey", "sailboat", "five", "six", "seven", "snowman", "nine", "ten", "jack", "queen", "king"],
+        ranks \\ [
+          "ace",
+          "deuce",
+          "trey",
+          "sailboat",
+          "five",
+          "six",
+          "seven",
+          "snowman",
+          "nine",
+          "ten",
+          "jack",
+          "queen",
+          "king"
+        ],
         suits \\ ["hearts", "spades", "clubs", "diamonds"]
       ) do
-        Enum.flat_map(suits, fn suit -> Enum.map(ranks, fn rank -> %{rank: rank, suit: suit} end) end)
+    Enum.flat_map(suits, fn suit -> Enum.map(ranks, fn rank -> %{rank: rank, suit: suit} end) end)
   end
 
-  def shuffle() do
+  @doc """
+  It'll pass back a copy of the deck that's passed in, but with the order randomized
+  """
+  @spec shuffle(deck) :: deck
+  def shuffle(unshuffled) do
+    # first let's get the length of
+    Enum.shuffle(unshuffled)
   end
 
-  def deal() do
+  # @doc """
+  # For practice (since I'm still new to elixir) I want to think about how I'd implement a shuffle myself
+  # ... I looked it up though, and the real version just uses a sort.
+  # I guess there's no way to shuffle in linear time when immutability is required...
+  # None that I can think of anyway
+  # """
+  # def shuffle_my_way(unshuffled) do
+  #   shuffle_my_way(unshuffled, length(unshuffled))
+  # end
+
+  # def shuffle_my_way(unshuffled, unshuffled_length, shuffled) when unshuffled_length == 0 do
+  #   shuffled
+  # end
+
+  # def shuffle_my_way(unshuffled, unshuffled_length, shuffled // []) do
+
+  # end
+
+  @doc """
+    move the requested number of cards from the origin deck to the hand
+    return the new origin deck and the new hand (as they are after dealing)
+  """
+  @spec deal(deck, deck, integer) :: {deck, deck}
+  def deal(origin_deck, hand, cards_requested) when cards_requested == 0 do
+    {origin_deck, hand}
   end
 
-  def contains? do
+  def deal(origin_deck, hand, cards_requested) do
+    {new_hand_cards, remaining_origin_deck} = Enum.split(origin_deck, cards_requested)
+    {remaining_origin_deck, hand ++ new_hand_cards}
+  end
+
+  @spec contains?(deck, card) :: boolean()
+  def contains?(deck_to_search, target_card) do
+    Enum.any?(deck_to_search, fn c -> c == target_card end)
   end
 
   def save do

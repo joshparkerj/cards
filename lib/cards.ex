@@ -3,6 +3,10 @@ defmodule Cards do
   Documentation for `Cards`.
   """
 
+  def hello do
+    "hi there!"
+  end
+
   @typedoc """
   A card
   """
@@ -90,9 +94,42 @@ defmodule Cards do
     Enum.any?(deck_to_search, fn c -> c == target_card end)
   end
 
-  def save do
+  @doc """
+  For now, just gonna save one deck
+  """
+  @spec save(deck, String.t()) :: :ok | {:error, term() | :badarg | :terminated}
+  def save(deck_of_cards, filename) do
+    case File.open(filename, [:write]) do
+      {:ok, file} ->
+        serialized_deck = :erlang.term_to_binary(deck_of_cards)
+
+        case IO.binwrite(file, serialized_deck) do
+          :ok ->
+            case File.close(file) do
+              :ok -> :ok
+              {:error, e} -> {:error, e}
+            end
+
+          {:error, e} ->
+            {:error, e}
+        end
+
+      {:error, e} ->
+        {:error, e}
+    end
   end
 
-  def load do
+  @doc """
+  try to get deck of cards from file
+  """
+  @spec load(String.t()) :: {:ok, deck} | :error
+  def load(filename) do
+    case File.read(filename) do
+      {:ok, bin} ->
+        {:ok, :erlang.binary_to_term(bin)}
+
+      {:error, _} ->
+        :error
+    end
   end
 end
